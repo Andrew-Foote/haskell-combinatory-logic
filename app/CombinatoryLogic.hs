@@ -6,6 +6,10 @@ data Term = S | K | App Term Term deriving (Eq, Show)
 
 -- Operational semantics
 
+{-| Apply the first applicable reduction rule once to a term. This may fail if there are
+no applicable reducton rules. Heads are reduced before arguments, so the reduction is
+normal-order.
+-}
 reduce1 :: Term -> Maybe Term
 reduce1 t = case t of
     App (App (App S u) v) w -> Just $ App (App u w) (App v w)
@@ -18,11 +22,16 @@ reduce1 t = case t of
                 Nothing -> Nothing
     _ -> Nothing
 
+{-| Repeatedly apply the first applicable reduction rule to a term until it is no longer
+reducible. Heads are reduced before arguments, so the reduction is normal-order. Some
+terms never become reducible, so a call to this function may not terminate.
+-}
 reduce :: Term -> Term
 reduce t = maybe t reduce (reduce1 t)
 
 -- Concrete syntax
 
+-- |Convert a term to a string representation using a minimal amount of parentheses.
 prettyTerm :: Term -> String
 prettyTerm t = case t of
     S -> "S"
@@ -36,6 +45,7 @@ prettyTerm t = case t of
 -- it's my first haskell program, so let's keep it simple and not get into parser
 -- combinators already
 
+-- |Parse a term from a string.
 parseTerm :: String -> Maybe Term
 parseTerm s = case termParser s of
     Just (t, []) -> Just t

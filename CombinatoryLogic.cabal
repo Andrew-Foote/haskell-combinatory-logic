@@ -79,6 +79,6 @@ test-suite CombinatoryLogic-test
     type:             exitcode-stdio-1.0
     main-is:          Main.hs
     other-modules:    CombinatoryLogic
-    build-depends:    base ^>=4.17.2.1, QuickCheck
+    build-depends:    base ^>=4.17.2.1, hspec, QuickCheck
     hs-source-dirs:   tests, app
     default-language: GHC2021
