@@ -1,5 +1,8 @@
 module CombinatoryLogic where
 
+import Type (Type, Type( (:->) ) )
+import qualified Type
+
 -- Abstract syntax
 
 data Term = S | K | App Term Term deriving (Eq, Show)
@@ -15,9 +18,9 @@ reduce1 t = case t of
     App (App (App S u) v) w -> Just $ App (App u w) (App v w)
     App (App K u) _ -> Just u
     App u v ->
-        case (reduce1 u) of
+        case reduce1 u of
             Just w -> Just (App w v)
-            Nothing -> case (reduce1 v) of
+            Nothing -> case reduce1 v of
                 Just w -> Just (App u w)
                 Nothing -> Nothing
     _ -> Nothing
@@ -28,6 +31,35 @@ terms never become reducible, so a call to this function may not terminate.
 -}
 reduce :: Term -> Term
 reduce t = maybe t reduce (reduce1 t)
+
+-- Type inference
+
+inferType :: Term -> Type.Env -> Type.FreshVarSupply -> Maybe (Type.Type, Type.Env, Type.FreshVarSupply)
+
+inferType S env supply = case Type.freshVar supply of
+    (a, supply1) -> case Type.freshVar supply1 of
+        (b, supply2) -> case Type.freshVar supply2 of
+            (c, supply3) -> Just (
+                (Type.VT a :-> Type.VT b :-> Type.VT c) :-> (Type.VT a :-> Type.VT b) :-> Type.VT a :-> Type.VT c,
+                env, supply3)
+
+inferType K env supply = case Type.freshVar supply of
+    (a, supply1) -> case Type.freshVar supply1 of
+        (b, supply2) -> Just (Type.VT a :-> Type.VT b :-> Type.VT a, env, supply2)
+
+inferType (App t u) env supply = case inferType t env supply of
+    Just (a, env1, supply1) -> case inferType u env1 supply1 of
+        Just (b, env2, supply2) -> case Type.freshVar supply2 of
+            (c, supply3) -> case Type.unify a (b :-> Type.VT c) env2 of
+                Just env3 -> Just (Type.VT c, env3, supply3)
+                Nothing -> Nothing
+        Nothing -> Nothing
+    Nothing -> Nothing
+
+principalType :: Term -> Maybe Type.Type
+principalType t = case inferType t Type.groundEnv Type.initialFreshVarSupply of
+    Just (a, env, _) -> Just $ Type.expand a env
+    Nothing -> Nothing
 
 -- Concrete syntax
 
