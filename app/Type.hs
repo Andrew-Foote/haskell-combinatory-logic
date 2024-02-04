@@ -45,6 +45,7 @@ infixr 0 :->
 data Type = VT Var | Type :-> Type
     deriving (Eq, Show)
 
+-- |List the variables occurring in a type.
 vars :: Type -> [Var]
 vars (VT a) = [a]
 vars (a :-> b) = vars a ++ vars b
@@ -106,6 +107,10 @@ newtype Env = Env { unEnv :: Map.HashMap Var Type }
 groundEnv :: Env
 groundEnv = Env Map.empty
 
+-- | List the bound type variables in a type environment.
+boundVars :: Env -> [Var]
+boundVars env = Map.keys $ unEnv env
+
 -- | Check whether a type variable is "bound", i.e. is mapped to a type, in a type environment.
 bound :: Var -> Env -> Bool
 bound a env = Map.member a $ unEnv env
@@ -123,7 +128,7 @@ bind :: Var -> Type -> Env -> Env
 bind a b env = Env $ Map.insert a b $ unEnv env
 
 {-| Fully expand a type in a type environment, so that it will no longer contain any type variables
-bound in the environment.
+bound in the environment. This may loop infinitely if the environment has a cycle.
 -}
 expand :: Type -> Env -> Type
 

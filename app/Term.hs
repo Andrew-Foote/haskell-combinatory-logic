@@ -1,4 +1,4 @@
-module CombinatoryLogic where
+module Term where
 
 import Type (Type, Type( (:->) ) )
 import qualified Type

@@ -1,13 +1,11 @@
-module Main where
+module TermSpec (spec) where
 
 import Control.Monad
 import System.Exit
-import Test.Hspec
+import Test.Hspec ( describe, it, Spec )
 import Test.QuickCheck
 
--- https://stackoverflow.com/questions/8976488/quickcheck-exit-status-on-failures-and-cabal-integration
-
-import CombinatoryLogic
+import Term ( Term(..), reduce1, reduce, prettyTerm, parseTerm )
 
 instance Arbitrary Term where
     arbitrary = oneof [ return S, return K, App <$> arbitrary <*> arbitrary ]
@@ -18,7 +16,7 @@ bB = App (App S (App K S)) K
 
 reduce1Spec :: Spec
 reduce1Spec = describe "reduce1" $ do
-    it "reduces MM correctly" $ reduce1 (App mM mM) == (Just $ App (App iI mM) (App iI mM))
+    it "reduces MM correctly" $ reduce1 (App mM mM) == Just (App (App iI mM) (App iI mM))
 
 {- we can't make these safely into property tests, since the arbitrary terms generated
 may lack normal forms!
@@ -50,8 +48,8 @@ parseTermSpec = describe "parseTerm" $ do
         property $ parseInvertsPretty
   where parseInvertsPretty t = parseTerm (prettyTerm t) == Just t
 
-main :: IO ()
-main = hspec $ do
+spec :: Spec
+spec = do
     reduce1Spec
     reduceSpec
     parseTermSpec
