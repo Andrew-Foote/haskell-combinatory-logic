@@ -56,18 +56,19 @@ common warnings
 executable app
     import:           warnings
     main-is:          Main.hs
-    other-modules:    Term, Type
+    other-modules:    Term, Type, Parser
     build-depends:
           base ^>=4.17.2.1
         , unordered-containers
         , hashable
     hs-source-dirs:   app
     default-language: GHC2021
+    default-extensions: LambdaCase
 
 test-suite test
     type:               exitcode-stdio-1.0
     main-is:            Spec.hs
-    other-modules:      Term, Type, TermSpec, TypeSpec
+    other-modules:      Term, Type, Parser, TermSpec, TypeSpec
     build-depends:
           base ^>=4.17.2.1
         , unordered-containers
@@ -79,5 +80,5 @@ test-suite test
     build-tool-depends: hspec-discover:hspec-discover == 2.*
     hs-source-dirs:     tests, app
     default-language:   GHC2021
-    default-extensions: 
+    default-extensions: LambdaCase
 
