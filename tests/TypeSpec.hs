@@ -1,5 +1,6 @@
 module TypeSpec (spec) where
 
+import qualified Data.HashSet as Set
 import Data.List.Extra
 import Data.Maybe
 import Test.Hspec
@@ -21,7 +22,7 @@ nameFreshVarsSpec = describe "nameFreshVars" $ do
     it "preserves the number of variable occurrences in a term" $
         property $ \ a -> length (vars a) == length (vars $ nameFreshVars a)
     it "preserves the number of distinct variables in a term" $
-        property $ \ a -> length (nub $ vars a) == length (nub $ vars $ nameFreshVars a)
+        property $ \ a -> Set.size (Set.fromList $ vars a) == Set.size (Set.fromList $ vars $ nameFreshVars a)
     it "affects only the fresh variable occurrences, and turns them into named variable occurrences" $
         property $ \ a -> and $ zipWith check (vars a) (vars $ nameFreshVars a) 
             where
@@ -53,7 +54,7 @@ unifySpec = describe "unify" $ do
 
 spec :: Spec
 spec = do
-    -- nameFreshVarsSpec    (seems to cuase an infinite loop)
+    nameFreshVarsSpec   -- (seems to cuase an infinite loop)
     expandSpec
     occursSpec
     unifySpec
